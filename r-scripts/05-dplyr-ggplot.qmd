@@ -6,6 +6,8 @@ format: html
 editor: 
   markdown: 
     wrap: 72
+editor_options:
+  chunk_output_type: console
 ---
 
 # Working with the dplyr and ggplot2 packages
@@ -13,6 +15,10 @@ editor:
 Load the required libraries :
 
 ```{r message = FALSE, warning = FALSE}
+
+# restore your libraryn (keep this at the start of every script)
+renv::restore()
+
 # clear the R environment
 rm(list = ls())
 
@@ -42,6 +48,40 @@ Read the FactCockleSize table with read_csv, which reads it as tibble
 
 ```{r}
 FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv")
+
+print(FactCockleSize)
+names(FactCockleSize)
+nrow(FactCockleSize)
+
+ggplot2::ggplot(data=FactCockleSize, mapping=aes(x=length_mm,y=thickness_mm)) + geom_point()
+
+# there is an outlier, likely an data entry mistake > remove it.
+FactCockleSize |> dplyr::filter(thickness_mm<500)
+
+FactCockleSize <- readr::read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSpormjGiM4uWMTIZYm9Upt5j1Ige_Wu9CrhGGdvjXwxmHP2R6S7JDyEmiGTn3fXihl5s5yBn_sdo8h/pub?gid=1538766002&single=true&output=csv") |> dplyr::filter(CockleObs_ID!=1531,CockleObs_ID!=469) |> dplyr::mutate(year=factor(year)) # make year a factor
+
+FactCockleSize |> dplyr::filter(thickness_mm>10 & length_mm<5)
+
+ggplot2::ggplot(data=FactCockleSize, mapping=aes(x=length_mm,y=thickness_mm,)) + geom_point(mapping=aes(colour=year)) + geom_smooth(method = "lm",colour='black')
+
+# calculate the linear regression
+model_lm <- lm(thickness_mm~length_mm, data=FactCockleSize)
+summary(model_lm)
+
+# equation: thickness_mm=-0,353+0,669*length_mm
+
+# a cockle of length 20 mm has an predicted width of:
+-0.353+0.669*20 
+# this regression is significant, R2=0,90, P<0.001
+
+# 
+
+drop_na(FactCockleSize) |>  
+ggplot2::ggplot(mapping=aes(x=length_mm,y=thickness_mm,)) + geom_point(mapping=aes(colour=year)) + geom_smooth(method = "lm",colour='black') + facet_wrap(~year) #make several lose year plots
+
+
+
+
 ```
 
 Plot with ggplot the relation between cockle thickness (thickness_mm, as
@@ -49,6 +89,8 @@ x) and length (length_mm), showing each year with a different color, and
 add a regression line through all the years
 
 ```{r}
+
+
 
 ```
 
